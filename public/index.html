@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VaultFlow Demo API</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.3);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 600px;
+            padding: 2.5rem;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--primary-glow);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            margin: 0.5rem 0 0 0;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-card {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-value {
+            font-weight: 600;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        .value-success {
+            color: var(--success);
+        }
+
+        .value-danger {
+            color: var(--danger);
+        }
+
+        .value-highlight {
+            color: #fbbf24;
+        }
+
+        .fact-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid var(--primary-glow);
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            position: relative;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fact-box::before {
+            content: '🐾 Dynamic API Fact';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-color);
+            padding: 0 10px;
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: bold;
+            border-radius: 10px;
+            border: 1px solid var(--primary-glow);
+        }
+
+        .fact-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            font-style: italic;
+            margin: 0;
+        }
+
+        /* THE NEW BUTTON */
+        .refresh-btn {
+            display: block;
+            width: 100%;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .refresh-btn:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard">
+        <div class="header">
+            <h1>Animal API Consumer</h1>
+            <p id="system-message">Loading system status...</p>
+        </div>
+
+        <div class="status-grid">
+            <div class="status-card">
+                <span class="status-label">VaultFlow Injection</span>
+                <span class="status-value value-success" id="app-status">Verifying...</span>
+            </div>
+
+            <div class="status-card">
+                <span class="status-label">API Key Check</span>
+                <span class="status-value value-highlight" id="api-key">Checking...</span>
+            </div>
+
+            <div class="status-card">
+                <span class="status-label">MongoDB Target URI</span>
+                <span class="status-value" style="color: #94a3b8; font-size: 0.8rem;" id="db-uri">...</span>
+            </div>
+
+            <div class="status-card">
+                <span class="status-label">Database Connection</span>
+                <span class="status-value value-danger" id="db-state">Checking...</span>
+            </div>
+        </div>
+
+        <div class="fact-box">
+            <p class="fact-text" id="animal-fact">Fetching cute animal fact...</p>
+        </div>
+
+        <button id="refresh-btn" class="refresh-btn" onclick="fetchData()">Fetch New Fact 🔄</button>
+    </div>
+
+    <script>
+        function fetchData() {
+            const btn = document.getElementById('refresh-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "Fetching from API... ⏳";
+
+            // Call the Express backend we just built
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('system-message').innerText = data.message;
+                    document.getElementById('app-status').innerText = data.appStatus;
+                    document.getElementById('api-key').innerText = data.apiKeyStatus;
+                    document.getElementById('db-uri').innerText = data.databaseUrl;
+                    document.getElementById('db-state').innerText = data.databaseState;
+                    document.getElementById('animal-fact').innerText = `"${data.fact}"`;
+                })
+                .catch(err => {
+                    document.getElementById('animal-fact').innerText = "Oops! Could not connect to API.";
+                })
+                .finally(() => {
+                    // Restore button text after a slight delay so it feels realistic
+                    setTimeout(() => {
+                        btn.innerText = originalText;
+                    }, 300);
+                });
+        }
+
+        // Fetch data immediately when the page loads
+        window.onload = fetchData;
+    </script>
+</body>
+
+</html>
