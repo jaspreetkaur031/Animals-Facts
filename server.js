@@ -95,20 +95,30 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.get('/api/status', async (req, res) => {
-    // Get the secrets that were injected by VaultFlow
     const mongoUri = process.env.DATABASE_URL;
     const apiKey = process.env.RED_LIST_API_KEY;
+
+    // 1. Create a simple list of facts
+    const facts = [
+        "Quokkas are known as the happiest animals on Earth! 🦘",
+        "A group of flamingos is called a 'flamboyance'. 🦩",
+        "Otters hold hands while sleeping to not drift apart. 🦦",
+        "Honey bees can flap their wings 200 times per second! 🐝",
+        "A snail can sleep for three years. 🐌",
+        "Elephants are the only animals that can't jump. 🐘"
+    ];
+
+    // 2. Pick one fact randomly from the list
+    const randomFact = facts[Math.floor(Math.random() * facts.length)];
 
     res.json({
         appStatus: "Active",
         message: "Secrets successfully injected via VaultFlow",
-        // Proves the secret reached the app
         databaseUrl: mongoUri ? "Secret Received (Decrypted in RAM) ✅" : "Missing 🔴",
-        // Simply checks if the secret exists to show "Connected" for the demo
         databaseState: mongoUri ? 'Connected 🟢 (Demo Mode)' : 'Disconnected 🔴',
-        // Proves the API key reached the app
         apiKeyStatus: apiKey ? `Authenticated 🟢` : 'Missing 🔴',
-        fact: "Quokkas are known as the happiest animals on Earth! 🦘"
+        // 3. Return the new random fact
+        fact: randomFact
     });
 });
 
